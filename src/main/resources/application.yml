@@ -1,0 +1,24 @@
+server:
+  port: 9090
+
+spring:
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+      indent_output: true
+    mapper.default_view_inclusion: true
+    parser:
+      allow_comments: true
+    deserialization:
+      fail_on_unknown_properties: false
+    default-property-inclusion: non_null
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+  datasource:
+    url: host
+    username: username
+    password: password
+    driver-class-name: org.postgresql.Driver

@@ -54,4 +54,10 @@ public class RunController {
         runService.deleteRun(id);
     }
 
+    @DeleteMapping("/by-user/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRunByUserId(@PathVariable Long userId) {
+        runService.deleteRunByUserId(userId);
+    }
+
 }

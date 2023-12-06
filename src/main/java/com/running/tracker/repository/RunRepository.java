@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface RunRepository extends JpaRepository<Run, Long>, JpaSpecificationExecutor<Run> {
 
-    boolean existsByFinishDateTimeIsNull();
+    boolean existsByUserIdAndFinishDateTimeIsNull(Long userId);
 
     void deleteByUserId(Long userId);
 

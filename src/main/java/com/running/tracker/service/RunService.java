@@ -5,8 +5,8 @@ import com.running.tracker.data.request.RunFilter;
 import com.running.tracker.data.request.RunFinishRequest;
 import com.running.tracker.data.request.RunStartRequest;
 import com.running.tracker.exception.BadRequestException;
-import com.running.tracker.exception.EntityNotFoundException;
 import com.running.tracker.repository.RunRepository;
+import com.running.tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,31 +17,18 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
+import static com.running.tracker.service.AvgSpeedCalculator.THOUSAND;
+import static com.running.tracker.service.AvgSpeedCalculator.calculateAvgSpeed;
+
 @Service
 @RequiredArgsConstructor
 public class RunService {
 
-    private static final BigDecimal THOUSAND = BigDecimal.valueOf(100);
-
     private final RunRepository runRepository;
+    private final UserRepository userRepository;
 
     public Page<Run> getRunsPage(RunFilter filter, Pageable pageable) {
-        Specification<Run> specification = Specification.where(null);
-
-        Long userId = filter.getUserId();
-        if (userId != null) {
-            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("userId"), userId));
-        }
-
-        LocalDateTime fromDateTime = filter.getFromDateTime();
-        if (fromDateTime != null) {
-            specification = specification.and(Specification.where((root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("startDateTime"), fromDateTime)));
-        }
-
-        LocalDateTime toDateTime = filter.getToDateTime();
-        if (toDateTime != null) {
-            specification = specification.and(Specification.where((root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("startDateTime"), toDateTime)));
-        }
+        Specification<Run> specification = SpecificationBuilder.getRunSpecification(filter);
 
         return runRepository.findAll(specification, pageable);
     }
@@ -51,10 +38,10 @@ public class RunService {
     }
 
     public Run startRun(RunStartRequest startRequest) {
-        boolean unfinishedRunExists = runRepository.existsByFinishDateTimeIsNull();
-        if (unfinishedRunExists) {
-            throw new BadRequestException("You have already started a run");
-        }
+        Long userId = startRequest.getUserId();
+
+        validateUser(userId);
+        validateUnfinishedRuns(userId);
 
         Run newRun = new Run();
         newRun.setUserId(startRequest.getUserId());
@@ -63,6 +50,20 @@ public class RunService {
         newRun.setStartLongitude(startRequest.getStartLongitude());
 
         return runRepository.save(newRun);
+    }
+
+    private void validateUnfinishedRuns(Long userId) {
+        boolean unfinishedRunExists = runRepository.existsByUserIdAndFinishDateTimeIsNull(userId);
+        if (unfinishedRunExists) {
+            throw new BadRequestException("You have already started a run");
+        }
+    }
+
+    private void validateUser(Long userId) {
+        boolean exists = userRepository.existsById(userId);
+        if (!exists) {
+            throw new BadRequestException("User is not found");
+        }
     }
 
     public Run finishRun(Long runId, RunFinishRequest finishRequest) {
@@ -93,8 +94,7 @@ public class RunService {
 
     private Double getAvgSpeed(Run run, Double distance) {
         long duration = run.duration();
-        BigDecimal hours = BigDecimal.valueOf(duration).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
-        return BigDecimal.valueOf(distance).divide(THOUSAND, 2, RoundingMode.HALF_UP).divide(hours, 2, RoundingMode.HALF_UP).doubleValue();
+        return calculateAvgSpeed(distance, duration);
     }
 
     private Double getDistance(RunFinishRequest finishRequest, Run run) {
@@ -113,5 +113,9 @@ public class RunService {
 
     public void deleteRun(Long runId) {
         runRepository.deleteById(runId);
+    }
+
+    public void deleteRunByUserId(Long userId) {
+        runRepository.deleteByUserId(userId);
     }
 }

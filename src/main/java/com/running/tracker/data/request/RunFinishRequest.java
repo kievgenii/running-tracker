@@ -1,5 +1,7 @@
 package com.running.tracker.data.request;
 
+import com.running.tracker.annotation.ValidLatitude;
+import com.running.tracker.annotation.ValidLongitude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +17,10 @@ import java.time.LocalDateTime;
 public class RunFinishRequest {
 
     @NotNull
+    @ValidLatitude
     private Double finishLatitude;
     @NotNull
+    @ValidLongitude
     private Double finishLongitude;
     private Double distance;
     private LocalDateTime finishDateTime = LocalDateTime.now();

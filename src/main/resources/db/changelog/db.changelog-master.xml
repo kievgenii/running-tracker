@@ -2,5 +2,6 @@
 
     <include file="classpath:db/changelog/231205_create_users_schema.sql" relativeToChangelogFile="false" />
     <include file="classpath:db/changelog/231205_create_runs_schema.sql" relativeToChangelogFile="false" />
+    <include file="classpath:db/changelog/231206_add_user_for_tests.sql" relativeToChangelogFile="false" />
 
 </databaseChangeLog>

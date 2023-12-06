@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class StatisticsResponse {
 
     private int runsCount;
-    private int totalDistance;
-    private int avgSpeed;
+    private double totalDistance;
+    private double avgSpeed;
 }

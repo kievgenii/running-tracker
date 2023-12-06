@@ -31,5 +31,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender sex;
 
+    private boolean test;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

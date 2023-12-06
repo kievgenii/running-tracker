@@ -8,6 +8,7 @@ import com.running.tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,9 +18,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final RunRepository runRepository;
 
-
     public Page<User> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+        Specification<User> spec = Specification.not((root, query, criteriaBuilder) -> criteriaBuilder.isTrue(root.get("test")));
+        return userRepository.findAll(spec, pageable);
     }
 
     public User getUser(Long userId) {

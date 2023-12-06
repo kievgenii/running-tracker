@@ -1,5 +1,6 @@
 package com.running.tracker.data.request;
 
+import com.running.tracker.annotation.ValidLatitude;
 import com.running.tracker.annotation.ValidLongitude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ public class RunStartRequest {
     @NotNull
     private Long userId;
     @NotNull
-    @ValidLongitude
+    @ValidLatitude
     private Double startLatitude;
     @NotNull
     @ValidLongitude
